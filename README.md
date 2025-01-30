@@ -5,12 +5,12 @@
 ![M3](asserts/1987-BMW-E30-M3.png)
 
 #### Input Question: 
-```
+```text
 Which automotive brand does this car belong to, and what visual cues or badges indicate that?
 ```
 
 #### Heima Encoder (MLLMs):
-```
+```text
 <SUMMARY> <THINKING_OF_SUMMARY> </SUMMARY>
 
 <CAPTION> <THINKING_OF_CAPTION> </CAPTION>
@@ -21,7 +21,7 @@ Which automotive brand does this car belong to, and what visual cues or badges i
 ```
 
 #### Heima Decoder (LLMs):
-```
+```text
 Summary:
 Below is the sequence of thought used for the summary: 
 I will identify the car brand by examining visual cues such as logos, 
