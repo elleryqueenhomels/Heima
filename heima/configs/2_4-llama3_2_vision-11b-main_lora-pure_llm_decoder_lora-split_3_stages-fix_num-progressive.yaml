@@ -1,0 +1,205 @@
+# Config for multi-device LoRA finetuning in lora_finetune_distributed.py
+# using a Llama3.2 11B Vision Instruct model
+#
+# This config assumes that you've run the following command before launching:
+#   tune download meta-llama/Llama-3.2-11B-Vision-Instruct --output-dir /tmp/Llama-3.2-11B-Vision-Instruct --ignore-patterns "original/consolidated*"
+#
+# To launch on 2 devices, run the following command from root:
+#   tune run --nproc_per_node 2 lora_finetune_distributed --config llama3_2_vision/11B_lora
+#
+# You can add specific overrides through the command line. For example
+# to override the checkpointer directory while launching training:
+#   tune run --nproc_per_node 2 lora_finetune_distributed --config llama3_2_vision/11B_lora checkpointer.checkpoint_dir=<YOUR_CHECKPOINT_DIR>
+#
+# This config works best when the model is being fine-tuned on 2+ GPUs.
+# For single device LoRA finetuning please use 11B_lora_single_device.yaml
+# or 11B_qlora_single_device.yaml
+
+exp_name: exp-step_4
+
+#main_pipeline_dataset_conversation: conversations_compress_summary
+#main_pipeline_dataset_conversation: conversations_compress_summary_caption
+main_pipeline_dataset_conversation: conversations_compress_summary_caption_reasoning
+
+previous_exp_name: exp-step_3
+main_adapter_path: /mnt/localssd/llava-cot-checkpoints/output-checkpoints/Llama-3.2-11B-Vision-LoRA/${previous_exp_name}/main/adapter_0.pt
+
+freeze_base_model: False
+
+summary_decoder: False
+summary_adapter_path: null
+summary_abstract_projection_state_dict: null
+caption_decoder: False
+caption_adapter_path: null
+caption_abstract_projection_state_dict: null
+reasoning_decoder: False
+reasoning_adapter_path: null
+reasoning_abstract_projection_state_dict: null
+
+num_thinking_tokens_summary: 1
+num_thinking_tokens_caption: 1
+num_thinking_tokens_reasoning: 1
+
+main_data_file: data_train-num_thinking_token_summary${num_thinking_tokens_summary}_caption${num_thinking_tokens_caption}_reasoning${num_thinking_tokens_reasoning}.json
+decoder_data_file: data_train-pure_llm-num_thinking_token_summary${num_thinking_tokens_summary}_caption${num_thinking_tokens_caption}_reasoning${num_thinking_tokens_reasoning}.json
+data_dir: /mnt/localssd/llava-cot-dataset/json_files/
+image_dir: /mnt/localssd/llava-cot-dataset/image_files/
+
+
+# Model arguments
+model:
+  _component_: torchtune.models.llama3_2_vision.lora_llama3_2_vision_11b
+  decoder_trainable: "lora"
+  encoder_trainable: "frozen"
+  fusion_trainable: "lora"
+  lora_attn_modules: ['q_proj', 'k_proj', 'v_proj','output_proj']
+  apply_lora_to_mlp: True
+  apply_lora_to_output: True
+  lora_rank: 16  # higher increases accuracy and memory
+  lora_alpha: 32  # usually alpha=2*rank
+  lora_dropout: 0.0
+  image_size: 560 # Make sure this matches the image_size in tokenizer
+
+# Xuan: decoder model arguments
+model_decoder:
+  _component_: torchtune.models.llama3_1.lora_llama3_1_8b
+  lora_attn_modules: ['q_proj', 'k_proj', 'v_proj', 'output_proj']
+  apply_lora_to_mlp: True
+  apply_lora_to_output: True
+  lora_rank: 16  # higher increases accuracy and memory
+  lora_alpha: 32  # usually alpha=2*rank
+  lora_dropout: 0.0
+  # Xuan: we keep True here, but actually we comment the 'abstract_projection' utility at
+  #   # row 674, and # row 692-693
+  #   in 'torchtune_pkg/torchtune/modules/transformer.py'
+  use_abstract_projection: True
+  projector_input_dim: 4096
+
+# Transform
+tokenizer:
+  _component_: torchtune.models.llama3_2_vision.llama3_2_vision_transform
+  path: /mnt/localssd/llava-cot-checkpoints/llava-cot-pretrained/Llama-3.2V-11B-cot/original/tokenizer.model
+  image_size: 560
+  max_seq_len: 2048
+
+# Checkpointer
+checkpointer:
+  _component_: torchtune.training.FullModelHFCheckpointer
+  checkpoint_dir: /mnt/localssd/llava-cot-checkpoints/llava-cot-pretrained/Llama-3.2V-11B-cot
+  checkpoint_files:
+    filename_format: model-{}-of-{}.safetensors
+    max_filename: "00009"
+  recipe_checkpoint: null
+  output_dir: /mnt/localssd/llava-cot-checkpoints/output-checkpoints/Llama-3.2-11B-Vision-LoRA/${exp_name}/main/
+  model_type: LLAMA3_VISION
+resume_from_checkpoint: False
+save_adapter_weights_only: True # PeFT formatting not available yet. This will save it in torchtune format only.
+save_step_interval: 2000
+
+# Xuan: add for decoder checkpointer
+checkpointer_decoder:
+  _component_: torchtune.training.FullModelHFCheckpointer
+  checkpoint_dir: /mnt/localssd/llava-cot-checkpoints/llama3_1/Llama-3.1-8B-Instruct/
+  checkpoint_files: [
+    model-00001-of-00004.safetensors,
+    model-00002-of-00004.safetensors,
+    model-00003-of-00004.safetensors,
+    model-00004-of-00004.safetensors
+  ]
+  recipe_checkpoint: null
+  output_dir: /mnt/localssd/llava-cot-checkpoints/output-checkpoints/Llama-3.1-8B-Instruct-LoRA/${exp_name}/decoder/
+  model_type: LLAMA3
+
+# Dataset
+dataset:
+  _component_: torchtune.datasets.multimodal.multimodal_chat_dataset
+  source: json
+  data_files: ${data_dir}/${main_data_file}
+  split: train
+  column_map:
+    conversations: ${main_pipeline_dataset_conversation}
+    image: image
+  image_dir: ${image_dir}
+  image_tag: "<image>"
+seed: 42
+shuffle: False
+collate_fn: torchtune.data.padded_collate_tiled_images_and_mask
+
+# Xuan: add for decoder dataset
+dataset_decoder:
+  _component_: torchtune.datasets.chat_dataset_multi_datasets
+  source: json
+  data_files: ${data_dir}/${decoder_data_file}
+  conversation_column: conversations
+  conversation_style: sharegpt
+  train_on_input: True
+  split: train
+
+# Fine-tuning arguments
+epochs: 1
+max_steps_per_epoch: null
+batch_size: 8
+gradient_accumulation_steps: 1  # Use to increase virtual batch size
+optimizer:
+  _component_: torch.optim.AdamW
+  fused: True
+  weight_decay: 0.01
+  lr: 1e-5
+lr_scheduler:
+  _component_: torchtune.training.lr_schedulers.get_cosine_schedule_with_warmup
+  num_warmup_steps: 100
+loss:
+  _component_: torchtune.modules.loss.CEWithChunkedOutputLoss
+clip_grad_norm: 1.0
+compile: False  # pytorch compile, set to true for better perf/memory
+
+# Xuan: add optimizer and lr_scheduler for decoder model
+optimizer_decoder:
+  _component_: torch.optim.AdamW
+  fused: True
+  # weight_decay: 0.01
+  lr: 5e-4
+lr_scheduler_decoder:
+  _component_: torchtune.training.lr_schedulers.get_cosine_schedule_with_warmup
+  num_warmup_steps: 100
+
+# Training env
+device: cuda
+
+# Memory management
+enable_activation_checkpointing: True  # True reduces memory
+dtype: bf16
+
+# Logging
+output_dir: /mnt/localssd/llava-cot-checkpoints/output-checkpoints/Llama-3.2-11B-Vision-LoRA/logs/
+metric_logger:
+  # _component_: torchtune.training.metric_logging.DiskLogger # for debugging
+  _component_: torchtune.training.metric_logging.WandBLogger  # for running records
+  log_dir: /mnt/localssd/llava-cot-checkpoints/output-checkpoints/Llama-3.2-11B-Vision-LoRA/logs/
+log_every_n_steps: 1
+log_peak_memory_stats: True
+
+# Profiler (disabled)
+profiler:
+  _component_: torchtune.training.setup_torch_profiler
+  enabled: False
+
+  #Output directory of trace artifacts
+  output_dir: ${output_dir}/profiling_outputs
+
+  #`torch.profiler.ProfilerActivity` types to trace
+  cpu: True
+  cuda: True
+
+  #trace options passed to `torch.profiler.profile`
+  profile_memory: False
+  with_stack: False
+  record_shapes: True
+  with_flops: False
+
+  # `torch.profiler.schedule` options:
+  # wait_steps -> wait, warmup_steps -> warmup, active_steps -> active, num_cycles -> repeat
+  wait_steps: 5
+  warmup_steps: 3
+  active_steps: 2
+  num_cycles: 1
