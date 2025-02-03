@@ -1,4 +1,4 @@
-# Heima: Efficient Reasoning with Hidden Thinking
+# Heima: Efficient Reasoning with Hidden Thinking ([arXiv](https://arxiv.org/abs/2501.19201))
 
 
 ## Demo
