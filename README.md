@@ -1,5 +1,6 @@
-# Heima: Efficient Reasoning with Hidden Thinking ([arXiv](https://arxiv.org/abs/2501.19201))
+# Heima: Efficient Reasoning with Hidden Thinking
 
+This repository provides an overview of all resources for the paper ["Efficient Reasoning with Hidden Thinking"](https://arxiv.org/abs/2501.19201).
 
 ## Demo
 ![M3](asserts/1987-BMW-E30-M3.png)
