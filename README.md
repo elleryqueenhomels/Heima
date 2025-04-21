@@ -1,4 +1,4 @@
-# Heima: Efficient Reasoning with Hidden Thinking
+# Heima
 
 This repository provides an overview of all resources for the paper ["Efficient Reasoning with Hidden Thinking"](https://arxiv.org/abs/2501.19201).
 
