@@ -10,7 +10,7 @@
 
 exp_name: exp-step_3
 
-lora_adapter_path: /home/xuans/sensei-fs-link/code/efficient-reasoning/efficient-reasoning/lora-ckpts/${exp_name}/main/adapter_0.pt
+lora_adapter_path: /workspace/Heima/Heima/encoder/main/adapter_0.pt
 
 
 # Model arguments
@@ -29,14 +29,14 @@ model:  # LoRA
 # Transform arguments
 tokenizer:
   _component_: torchtune.models.llama3_2_vision.llama3_2_vision_transform
-  path: /mnt/localssd/llava-cot-checkpoints/llava-cot-pretrained/Llama-3.2V-11B-cot/original/tokenizer.model
+  path: /workspace/Heima/Llama-3.2V-11B-cot/tokenizer.model
   image_size: 560
   max_seq_len: 2048
 
 # Checkpointer
 checkpointer:
   _component_: torchtune.training.FullModelHFCheckpointer
-  checkpoint_dir: /mnt/localssd/llava-cot-checkpoints/llava-cot-pretrained/Llama-3.2V-11B-cot
+  checkpoint_dir: /workspace/Heima/Llama-3.2V-11B-cot
   checkpoint_files:
     filename_format: model-{}-of-{}.safetensors
     max_filename: "00009"

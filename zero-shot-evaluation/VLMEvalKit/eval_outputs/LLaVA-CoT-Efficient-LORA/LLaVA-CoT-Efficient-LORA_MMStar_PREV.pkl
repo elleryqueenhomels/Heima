@@ -1,0 +1,1 @@
+/workspace/Heima/zero-shot-evaluation/VLMEvalKit/eval_outputs/LLaVA-CoT-Efficient-LORA/T20250723_G05e5720f/LLaVA-CoT-Efficient-LORA_MMStar_PREV.pkl

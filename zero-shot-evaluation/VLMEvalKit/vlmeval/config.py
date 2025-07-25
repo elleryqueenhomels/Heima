@@ -342,9 +342,9 @@ llama_series={
     'LLaVA-CoT': partial(llama_vision, model_path='Xkev/Llama-3.2V-11B-cot'),
 
     # Xuan: add here
-    'LLaVA-CoT-Efficient': partial(llama_vision_efficient, model_path='Xkev/Llama-3.2V-11B-cot', cfg = '/home/xuans/sensei-fs-link/code/efficient-reasoning/efficient-reasoning/zero-shot-evaluation/VLMEvalKit/main_python/3-llama3_2_vision-11b-generation.yaml'),
-    'LLaVA-CoT-Efficient-LORA': partial(llama_vision_efficient_lora, model_path='Xkev/Llama-3.2V-11B-cot', cfg = '/home/xuans/sensei-fs-link/code/efficient-reasoning/efficient-reasoning/zero-shot-evaluation/VLMEvalKit/main_python/3-llama3_2_vision-11b-generation-lora.yaml'),
-    'LLaVA-CoT-Efficient-LORA-Decode': partial(llama_vision_efficient_lora_decode, model_path='Xkev/Llama-3.2V-11B-cot', cfg = '/home/xuans/sensei-fs-link/code/efficient-reasoning/efficient-reasoning/zero-shot-evaluation/VLMEvalKit/main_python/3-llama3_2_vision-11b-generation-lora-decode.yaml'),
+    'LLaVA-CoT-Efficient': partial(llama_vision_efficient, model_path='Xkev/Llama-3.2V-11B-cot', cfg = '/workspace/Heima/zero-shot-evaluation/VLMEvalKit/configs/3-llama3_2_vision-11b-generation.yaml'),
+    'LLaVA-CoT-Efficient-LORA': partial(llama_vision_efficient_lora, model_path='Xkev/Llama-3.2V-11B-cot', cfg = '/workspace/Heima/zero-shot-evaluation/VLMEvalKit/configs/3-llama3_2_vision-11b-generation-lora.yaml'),
+    'LLaVA-CoT-Efficient-LORA-Decode': partial(llama_vision_efficient_lora_decode, model_path='Xkev/Llama-3.2V-11B-cot', cfg = '/workspace/Heima/zero-shot-evaluation/VLMEvalKit/configs/3-llama3_2_vision-11b-generation-lora-decode.yaml'),
     
     'Llama-3.2-90B-Vision-Instruct': partial(llama_vision, model_path='meta-llama/Llama-3.2-90B-Vision-Instruct'),
 }

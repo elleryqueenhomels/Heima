@@ -1,6 +1,6 @@
 #!/bin/sh
 
-output_path="zero-shot-evaluation/VLMEvalKit/eval_outputs/"
+output_path="eval_outputs/"
 
 datasets="MMVet MathVista_MINI MMStar AI2D_TEST HallusionBench MMBench_DEV_EN_V11"
 
@@ -9,9 +9,10 @@ datasets="MMVet MathVista_MINI MMStar AI2D_TEST HallusionBench MMBench_DEV_EN_V1
 # model="LLaVA-CoT-Efficient"
 model="LLaVA-CoT-Efficient-LORA"
 
-torchrun --nproc-per-node=8 \
+torchrun --nproc-per-node=1 \
           run.py \
           --data $datasets \
           --model $model \
           --work-dir $output_path \
+          --reuse
 

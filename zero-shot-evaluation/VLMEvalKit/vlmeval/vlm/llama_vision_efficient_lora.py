@@ -96,7 +96,7 @@ class llama_vision_efficient_lora(BaseModel):
         device_map['multi_modal_projector'] = rank + world_size * (num_gpus - 1)
         return device_map
 
-    def __init__(self, model_path='meta-llama/Llama-3.2-11B-Vision-Instruct', cfg = '/home/xuans/sensei-fs-link/code/efficient-reasoning/efficient-reasoning/zero-shot-evaluation/VLMEvalKit/main_python/3-llama3_2_vision-11b-generation-lora.yaml', **kwargs):
+    def __init__(self, model_path='meta-llama/Llama-3.2-11B-Vision-Instruct', cfg = '/workspace/Heima/zero-shot-evaluation/VLMEvalKit/configs/3-llama3_2_vision-11b-generation-lora.yaml', **kwargs):
         try:
             from transformers import MllamaForConditionalGeneration, AutoProcessor
         except Exception as e:
